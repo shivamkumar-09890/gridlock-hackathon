@@ -58,9 +58,8 @@ mlartifacts/
 # Data Files
 # =====================================================
 
-data/raw/
-data/interim/
-data/features/
+# data/raw/
+# data/features/
 
 # Keep submissions if you want team visibility
 # data/submissions/

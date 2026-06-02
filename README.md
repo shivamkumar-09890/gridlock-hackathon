@@ -1,264 +1,458 @@
-# gridlock-hackathon
-# Traffic Demand Prediction
+# Gridlock Hackathon
 
-## Overview
+Traffic demand prediction solution developed for the Gridlock Hackathon.
 
-This project was developed as part of the **Gridlock Hackathon**. The objective is to predict traffic demand for road segments using spatial, road-network, and environmental features.
+The project follows a modular machine learning architecture that separates:
 
-The dataset contains traffic-related information such as:
-
-* Geohash (location identifier)
-* Road Type
-* Number of Lanes
-* Temperature
-* Day
-* Traffic Demand (target variable)
-
-The goal is to build machine learning models capable of accurately estimating normalized traffic demand values.
+- Data Loading
+- Preprocessing
+- Feature Engineering
+- Model Training
+- Inference
+- Experiment Tracking
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```text
-gridlock/
+gridlock-hackathon/
+│
+├── README.md
+├── requirements.txt
+├── .gitignore
+├── .env
 │
 ├── data/
 │   ├── raw/
 │   │   ├── train.csv
-│   │   └── test.csv
-│   │
-│   ├── processed/
-│   │   ├── train_processed.csv
-│   │   └── test_processed.csv
-│   │
-│   └── submissions/
-│       ├── submission.csv
-│       └── submission_YYYYMMDD_HHMMSS.csv
-│
-├── notebooks/
-│   ├── 01_eda.ipynb
-│   ├── 02_feature_engineering.ipynb
-│   └── 03_modeling.ipynb
-│
-├── src/
-│   ├── data/
-│   │   ├── load_data.py
-│   │   └── preprocess.py
+│   │   ├── test.csv
+│   │   └── sample_submission.csv
 │   │
 │   ├── features/
+│   │   ├── train_features.parquet
+│   │   └── test_features.parquet
+│   │
+│   └── submissions/
+│       ├── submission_v1.csv
+│       └── submission_v2.csv
+│
+├── notebooks/
+│   ├── shivam_eda.ipynb
+│   ├── geohash_analysis.ipynb
+│   └── feature_experiments.ipynb
+│
+├── src/
+│   │
+│   ├── config/
+│   │   ├── config.yaml
+│   │   └── features.yaml
+│   │
+│   ├── data/
+│   │   ├── load_data.py
+│   │   └── preprocessing.py
+│   │
+│   ├── features/
+│   │   ├── base_feature.py
 │   │   ├── geohash_features.py
-│   │   └── feature_builder.py
+│   │   ├── weather_features.py
+│   │   ├── road_features.py
+│   │   └── feature_pipeline.py
 │   │
 │   ├── models/
+│   │   ├── base_model.py
+│   │   └── catboost_model.py
+│   │
+│   ├── training/
 │   │   ├── train_catboost.py
-│   │   ├── predict.py
-│   │   └── evaluate.py
+│   │   └── cross_validation.py
+│   │
+│   ├── inference/
+│   │   ├── predictor.py
+│   │   └── generate_submission.py
 │   │
 │   └── utils/
-│       ├── config.py
-│       └── helpers.py
+│       ├── metrics.py
+│       └── save_load.py
 │
-├── reports/
-│   ├── figures/
-│   └── eda_summary.md
+├── experiments/
+│   ├── exp_001_baseline.yaml
+│   ├── exp_002_geohash.yaml
+│   └── exp_003_weather.yaml
 │
-├── requirements.txt
-├── environment.yml
-├── .gitignore
-└── README.md
+├── mlruns/
+│
+├── models/
+│   └── catboost/
+│
+└── tests/
 ```
 
 ---
 
-## Exploratory Data Analysis
+# Folder Explanation
 
-Several exploratory analyses were performed to understand the dataset.
+## data/
 
-### Demand Distribution
+Contains all datasets used during development.
 
-Observations:
+### raw/
 
-* Demand values are bounded between 0 and 1.
-* The distribution is highly right-skewed.
-* Skewness ≈ 3.7.
-* Most observations have relatively low demand.
-
-### Road Type Analysis
-
-Road types are highly imbalanced:
-
-| Road Type   |   Count |
-| ----------- | ------: |
-| Residential | ~69,230 |
-| Street      |  ~3,909 |
-| Highway     |  ~3,560 |
-
-Demand is strongly associated with road type:
-
-| Road Type   | Mean Demand |
-| ----------- | ----------: |
-| Residential |      ~0.057 |
-| Street      |      ~0.273 |
-| Highway     |      ~0.611 |
-
-### Geohash Analysis
-
-* Approximately 1,249 unique geohashes.
-* Geohash exhibits a strong relationship with demand.
-* Correlation Ratio (Eta) ≈ 0.83.
-
-This indicates that spatial location is a major determinant of traffic demand.
-
-### Latitude and Longitude
-
-Geohashes were decoded into latitude and longitude coordinates.
-
-Findings:
-
-* Linear correlation between latitude/longitude and demand was very weak.
-* Spatial information is still highly predictive.
-* Demand appears to be driven by spatial clusters rather than simple linear geographic trends.
-
----
-
-## Baseline Models
-
-### Geohash Mean Lookup
-
-Prediction:
+Stores the original competition files.
 
 ```text
-Demand = Mean demand of each geohash
+train.csv
+test.csv
+sample_submission.csv
 ```
 
-RMSE ≈ 0.0786
+These files should never be modified.
 
-### Road Type Mean Lookup
+### features/
 
-Prediction:
+Stores processed feature datasets generated by the feature pipeline.
+
+Example:
 
 ```text
-Demand = Mean demand of each road type
+train_features.csv
+test_features.csv
 ```
 
-RMSE ≈ 0.0704
+### submissions/
 
-### Geohash + Road Type Lookup
+Stores generated competition submissions.
 
-Prediction:
+Example:
 
 ```text
-Demand = Mean demand for each (RoadType, Geohash) pair
+submission_v1.csv
+submission_v2.csv
+ensemble_v1.csv
 ```
-
-RMSE ≈ 0.0483
 
 ---
 
-## Machine Learning Model
+## notebooks/
 
-### CatBoost Regressor
+Used only for:
 
-Features:
+- Exploratory Data Analysis (EDA)
+- Quick experiments
+- Visualization
 
-* Geohash
-* RoadType
+Training pipelines should not depend on notebooks.
 
-Categorical handling:
+---
 
-* Native CatBoost categorical encoding
+## src/
 
-Performance:
+Contains all production code.
+
+---
+
+## src/config/
+
+Contains project configuration files.
+
+### config.yaml
+
+General project settings.
+
+Example:
+
+```yaml
+target_column: Demand
+random_seed: 42
+```
+
+### features.yaml
+
+Controls which feature modules are enabled.
+
+Example:
+
+```yaml
+features:
+  geohash:
+    enabled: true
+
+  weather:
+    enabled: true
+```
+
+---
+
+## src/data/
+
+Responsible for:
+
+- Loading datasets
+- Cleaning data
+- Handling missing values
+
+### load_data.py
+
+Provides dataset loading functions.
+
+### preprocessing.py
+
+Contains preprocessing logic.
+
+Examples:
+
+- Missing value imputation
+- Basic cleaning
+- Data normalization
+
+---
+
+## src/features/
+
+Responsible for feature engineering.
+
+Each feature group should be implemented independently.
+
+### base_feature.py
+
+Abstract interface implemented by all feature modules.
+
+Required methods:
+
+```python
+fit()
+transform()
+```
+
+### feature_pipeline.py
+
+Combines all feature modules into a single pipeline.
+
+Pipeline Flow:
 
 ```text
-RMSE ≈ 0.0532
-R²   ≈ 0.844
+Raw Data
+    ↓
+Geohash Features
+    ↓
+Weather Features
+    ↓
+Road Features
+    ↓
+Final Feature Dataset
 ```
-
-CatBoost was selected because:
-
-* Excellent support for categorical features.
-* Minimal preprocessing requirements.
-* Strong performance on tabular datasets.
 
 ---
 
-## Feature Engineering
+## src/models/
 
-Current features:
+Contains model implementations.
 
-* Geohash
-* RoadType
-* Temperature
-* NumberOfLanes
-* Day
+### base_model.py
 
-Additional experiments:
+Abstract model interface.
 
-* Geohash decoding to latitude and longitude.
-* Spatial feature analysis.
-* Sequential residual modeling inspired by Gram-Schmidt orthogonalization.
+Required methods:
+
+```python
+train()
+predict()
+save()
+load()
+```
+
+### catboost_model.py
+
+CatBoost regression model implementation.
+
+Future models:
+
+```text
+xgboost_model.py
+lightgbm_model.py
+nn_model.py
+```
 
 ---
 
-## Running the Project
+## src/training/
 
-### Create Environment
+Contains model training scripts.
 
-```bash
-conda create -n gridlock python=3.12
-conda activate gridlock
+### train_catboost.py
+
+Runs:
+
+1. Data loading
+2. Preprocessing
+3. Feature engineering
+4. Training
+5. Evaluation
+6. Model saving
+
+---
+
+## src/inference/
+
+Contains prediction pipelines.
+
+### predictor.py
+
+Loads:
+
+- Model
+- Feature Pipeline
+- Preprocessor
+
+and produces predictions.
+
+### generate_submission.py
+
+Creates competition submission files.
+
+---
+
+## src/utils/
+
+Utility functions.
+
+### metrics.py
+
+Evaluation metrics.
+
+Examples:
+
+```python
+RMSE
+MAE
 ```
 
-### Install Dependencies
+### save_load.py
 
-```bash
-pip install -r requirements.txt
+Serialization utilities.
+
+Examples:
+
+```python
+save_object()
+load_object()
 ```
 
-### Run EDA
+---
 
-```bash
-jupyter notebook notebooks/01_eda.ipynb
+## experiments/
+
+Stores experiment definitions.
+
+Example:
+
+```yaml
+experiment_name: geohash_v1
+
+model:
+  depth: 8
+
+features:
+  geohash: true
 ```
 
-### Train Model
+Allows reproducible experimentation.
 
-```bash
-python src/models/train_catboost.py
+---
+
+## mlruns/
+(This is future target not implemneted now)
+MLflow tracking directory.
+
+Contains:
+
+- Parameters
+- Metrics
+- Artifacts
+- Models
+
+Generated automatically by MLflow.
+
+
+
+# Development Workflow
+
+## Step 1
+
+Perform EDA.
+
+```text
+notebooks/
 ```
 
-### Generate Submission
+---
 
-```bash
-python src/models/predict.py
+## Step 2
+
+Implement features.
+
+```text
+src/features/
 ```
 
-Submission files will be saved under:
+---
+
+## Step 3
+
+Train model.
+
+```bash
+python -m src.training.train_catboost
+```
+
+---
+
+## Step 4
+
+Generate predictions.
+
+```bash
+python -m src.inference.generate_submission
+```
+
+---
+
+## Step 5
+
+Upload submission to leaderboard.
+
+Store resulting file in:
 
 ```text
 data/submissions/
 ```
 
+# Experiment Tracking
+
+MLflow is used for experiment tracking.(Stiil not done but will be done soon)
+
+Tracked information:
+
+- Hyperparameters
+- Metrics
+- Models
+- Artifacts
+
+Example:
+
+```python
+mlflow.log_param("depth", 8)
+mlflow.log_metric("rmse", score)
+```
+
 ---
 
-## Future Improvements
+# Future Improvements
 
-* Geohash embeddings
-* Target encoding
-* Spatial clustering features
-* CatBoost hyperparameter optimization
-* Ensemble methods (CatBoost + LightGBM)
-* Temporal feature engineering
-* Graph-based road network features
-
----
-
-## Author
-
-Shivam Kumar
-
-B.Tech Civil Engineering
-
-Machine Learning and AI Enthusiast
+- XGBoost
+- LightGBM
+- Neural Networks
+- Geospatial clustering
+- Model ensembling
+- Stacking
+- Automated hyperparameter tuning

@@ -1,0 +1,13 @@
+project:
+  name: gridlock_hackathon
+
+paths:
+  train: data/raw/train.csv
+  test: data/raw/test.csv
+
+output:
+  feature_train: data/features/train_features.parquet
+  feature_test: data/features/test_features.parquet
+
+random_seed: 42
+target_column: Demand

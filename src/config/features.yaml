@@ -1,0 +1,15 @@
+features:
+
+  geohash:
+    enabled: true
+    decode_geohash: true
+    frequency_encoding: true
+
+  weather:
+    enabled: true
+    temperature_features: true
+
+  road:
+    enabled: true
+    lane_features: true
+    roadtype_encoding: true

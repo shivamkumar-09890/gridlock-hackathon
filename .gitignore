@@ -43,7 +43,7 @@ mlartifacts/
 # Model Files
 # =====================================================
 
-models/
+# models/
 *.pkl
 *.pickle
 *.joblib

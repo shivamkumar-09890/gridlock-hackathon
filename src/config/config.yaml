@@ -6,8 +6,8 @@ paths:
   test: data/raw/test.csv
 
 output:
-  feature_train: data/features/train_features.parquet
-  feature_test: data/features/test_features.parquet
+  feature_train: data/features/train_features.csv
+  feature_test: data/features/test_features.csv
 
 random_seed: 42
 target_column: Demand

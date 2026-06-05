@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from features.catboost.base_feature import BaseFeature
+from features.base_feature import BaseFeature
 
 
 class WeatherFeatures(BaseFeature):

@@ -1,4 +1,4 @@
-from features.catboost.base_feature import BaseFeature
+from features.base_feature import BaseFeature
 
 from features.catboost.temporal_features import TemporalFeatures
 from features.catboost.geohash_features import GeohashFeatures

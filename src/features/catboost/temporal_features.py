@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from features.catboost.base_feature import BaseFeature
+from features.base_feature import BaseFeature
 
 
 class TemporalFeatures(BaseFeature):

@@ -14,9 +14,6 @@ class XGBoostDemandModel:
             "objective": "reg:squarederror",
             "eval_metric": "rmse",
             "random_state": 42,
-
-            # Important
-            "enable_categorical": True,
             "tree_method": "hist",
         }
 

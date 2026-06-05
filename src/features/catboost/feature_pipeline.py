@@ -1,9 +1,9 @@
-from src.features.base_feature import BaseFeature
+from features.catboost.base_feature import BaseFeature
 
-from src.features.temporal_features import TemporalFeatures
-from src.features.geohash_features import GeohashFeatures
-from src.features.weather_features import WeatherFeatures
-from src.features.road_features import RoadFeatures
+from features.catboost.temporal_features import TemporalFeatures
+from features.catboost.geohash_features import GeohashFeatures
+from features.catboost.weather_features import WeatherFeatures
+from features.catboost.road_features import RoadFeatures
 
 
 class FeaturePipeline(BaseFeature):

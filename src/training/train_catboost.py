@@ -14,7 +14,7 @@ from sklearn.model_selection import KFold
 from src.data.load_data import load_train
 from src.data.preprocessing import Preprocessor
 
-from src.features.feature_pipeline import (
+from features.catboost.feature_pipeline import (
     FeaturePipeline
 )
 

@@ -1,7 +1,7 @@
 import pandas as pd
 import geohash2
 
-from src.features.base_feature import BaseFeature
+from features.catboost.base_feature import BaseFeature
 
 
 class GeohashFeatures(BaseFeature):

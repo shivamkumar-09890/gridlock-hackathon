@@ -1,4 +1,8 @@
-from features.base_feature import BaseFeature
+import pandas as pd
+import numpy as np
+
+from src.features.base_feature import BaseFeature
+
 
 class WeatherFeatures(BaseFeature):
 
@@ -9,14 +13,52 @@ class WeatherFeatures(BaseFeature):
 
         df = df.copy()
 
-        if "Temperature" in df.columns:
+        # -------------------------
+        # Temperature Squared
+        # -------------------------
 
-            df["temp_squared"] = (
-                df["Temperature"] ** 2
+        df["temperature_sq"] = (
+            df["Temperature"] ** 2
+            - df["Temperature"]
+        )
+
+        # -------------------------
+        # Temperature Bucket
+        # -------------------------
+
+        df["temp_bucket"] = pd.cut(
+            df["Temperature"],
+            bins=[-100, 15, 25, 35, 100],
+            labels=[
+                "cold",
+                "mild",
+                "warm",
+                "hot"
+            ]
+        )
+
+        # -------------------------
+        # Weather + Temp
+        # -------------------------
+
+        if "Weather" in df.columns:
+
+            df["weather_temp"] = (
+                df["Weather"].astype(str)
+                + "_"
+                + df["temp_bucket"].astype(str)
             )
 
-            df["temp_log"] = (
-                df["Temperature"] + 1
+        # -------------------------
+        # Geo + Temp Bucket
+        # -------------------------
+
+        if "geohash" in df.columns:
+
+            df["geo_temp"] = (
+                df["geohash"].astype(str)
+                + "_"
+                + df["temp_bucket"].astype(str)
             )
 
         return df

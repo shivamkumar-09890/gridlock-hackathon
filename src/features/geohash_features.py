@@ -1,48 +1,86 @@
-import pygeohash as pgh
+import pandas as pd
+import geohash2
 
-from features.base_feature import BaseFeature
+from src.features.base_feature import BaseFeature
 
 
 class GeohashFeatures(BaseFeature):
+    """
+    Geospatial feature engineering.
+    """
 
-    def fit(self, df):
-        self.freq_map = (
-            df["geohash"]
-            .value_counts()
-            .to_dict()
-        )
-
+    def fit(self, df: pd.DataFrame):
         return self
 
-    def transform(self, df):
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
 
         df = df.copy()
 
-        if "geohash" not in df.columns:
-            return df
+        # -------------------------
+        # Decode Geohash
+        # -------------------------
 
-        latitudes = []
-        longitudes = []
+        decoded = df["geohash"].apply(
+            geohash2.decode
+        )
 
-        for g in df["geohash"]:
+        df["lat"] = decoded.str[0].astype(float)
+        df["lon"] = decoded.str[1].astype(float)
 
-            try:
-                lat, lon = pgh.decode(g)
+        # -------------------------
+        # Geo-Hour
+        # -------------------------
 
-            except Exception:
-                lat = None
-                lon = None
+        if "hour" in df.columns:
 
-            latitudes.append(lat)
-            longitudes.append(lon)
+            df["geo_hour"] = (
+                df["geohash"].astype(str)
+                + "_"
+                + df["hour"].astype(str)
+            )
 
-        df["latitude"] = latitudes
-        df["longitude"] = longitudes
+        # -------------------------
+        # Geo-Period
+        # -------------------------
 
-        df["geohash_frequency"] = (
-            df["geohash"]
-            .map(self.freq_map)
-            .fillna(0)
+        if "period" in df.columns:
+
+            df["geo_period"] = (
+                df["geohash"].astype(str)
+                + "_"
+                + df["period"].astype(str)
+            )
+
+        # -------------------------
+        # Geo-Weather
+        # -------------------------
+
+        if "Weather" in df.columns:
+
+            df["geo_weather"] = (
+                df["geohash"].astype(str)
+                + "_"
+                + df["Weather"].astype(str)
+            )
+
+        # -------------------------
+        # Geo-Road
+        # -------------------------
+
+        if "RoadType" in df.columns:
+
+            df["geo_road"] = (
+                df["geohash"].astype(str)
+                + "_"
+                + df["RoadType"].astype(str)
+            )
+
+        # -------------------------
+        # Spatial Interaction
+        # -------------------------
+
+        df["lat_lon_interaction"] = (
+            df["lat"] * df["lon"]
         )
 
         return df

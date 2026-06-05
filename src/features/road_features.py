@@ -1,36 +1,30 @@
-from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 
-from features.base_feature import BaseFeature
+from src.features.base_feature import BaseFeature
 
 
 class RoadFeatures(BaseFeature):
 
     def fit(self, df):
-
-        self.road_encoder = LabelEncoder()
-
-        self.road_encoder.fit(
-            df["RoadType"].astype(str)
-        )
-
         return self
 
     def transform(self, df):
 
         df = df.copy()
 
-        if "RoadType" in df.columns:
+        # -------------------------
+        # RoadType + Period
+        # -------------------------
 
-            df["roadtype_encoded"] = (
-                self.road_encoder.transform(
-                    df["RoadType"].astype(str)
-                )
-            )
+        if (
+            "RoadType" in df.columns
+            and "period" in df.columns
+        ):
 
-        if "NumberOfLanes" in df.columns:
-
-            df["lanes_squared"] = (
-                df["NumberOfLanes"] ** 2
+            df["roadtype_period"] = (
+                df["RoadType"].astype(str)
+                + "_"
+                + df["period"].astype(str)
             )
 
         return df

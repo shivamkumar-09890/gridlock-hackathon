@@ -1,44 +1,31 @@
-from pathlib import Path
+# src/models/catboost_model.py
 
 from catboost import CatBoostRegressor
 
-from src.models.base_model import BaseModel
 
+class CatBoostDemandModel:
 
-class CatBoostDemandModel(BaseModel):
+    def __init__(
+        self,
+        iterations=5000,
+        learning_rate=0.015,
+        depth=10,
+        random_seed=42,
+    ):
 
-    def __init__(self):
+        self.params = {
+            "iterations": iterations,
+            "learning_rate": learning_rate,
+            "depth": depth,
+            "loss_function": "RMSE",
+            "eval_metric": "RMSE",
+            "random_seed": random_seed,
+            "early_stopping_rounds": 300,
+            "verbose": 100,
+        }
 
-        self.model = CatBoostRegressor(
-            iterations=1000,
-            learning_rate=0.05,
-            depth=8,
-            loss_function="RMSE",
-            verbose=100
+    def build(self):
+
+        return CatBoostRegressor(
+            **self.params
         )
-
-    def train(self, X, y):
-
-        self.model.fit(
-            X,
-            y
-        )
-
-    def predict(self, X):
-
-        return self.model.predict(X)
-
-    def save(self, path):
-
-        Path(path).parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
-
-        self.model.save_model(path)
-
-    def load(self, path):
-
-        self.model.load_model(path)
-
-        return self

@@ -1,34 +1,66 @@
-from features.base_feature import BaseFeature
+from src.features.base_feature import BaseFeature
+
+from src.features.temporal_features import TemporalFeatures
 from src.features.geohash_features import GeohashFeatures
 from src.features.weather_features import WeatherFeatures
 from src.features.road_features import RoadFeatures
 
 
 class FeaturePipeline(BaseFeature):
+    """
+    Main feature engineering pipeline.
+
+    Each feature module:
+    1. Learns statistics in fit()
+    2. Creates features in transform()
+
+    Feature order matters because some features depend
+    on columns created by previous steps.
+
+    Current flow:
+
+    TemporalFeatures
+        ↓
+    GeohashFeatures
+        ↓
+    WeatherFeatures
+        ↓
+    RoadFeatures
+    """
 
     def __init__(self):
 
-        self.geohash = GeohashFeatures()
-        self.weather = WeatherFeatures()
-        self.road = RoadFeatures()
+        self.feature_steps = [
+            TemporalFeatures(),
+            GeohashFeatures(),
+            WeatherFeatures(),
+            RoadFeatures(),
+        ]
 
     def fit(self, df):
+        """
+        Fit all feature generators.
+        """
 
-        self.geohash.fit(df)
-        self.weather.fit(df)
-        self.road.fit(df)
+        for step in self.feature_steps:
+            step.fit(df)
 
         return self
 
     def transform(self, df):
+        """
+        Apply all feature engineering steps.
+        """
 
-        df = self.geohash.transform(df)
-        df = self.weather.transform(df)
-        df = self.road.transform(df)
+        for step in self.feature_steps:
+            df = step.transform(df)
 
         return df
 
     def fit_transform(self, df):
+        """
+        Fit and transform training data.
+        """
 
         self.fit(df)
 
